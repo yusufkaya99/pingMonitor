@@ -84,12 +84,12 @@ trap cleanup SIGINT
 echo -e " ${CYAN}PING MONITOR by Andasis Inc.\n${NC}"
 
 # Header row
-printf " ${BOLD}%-16s | %-16s | %-8s | %-17s | %-11s | %s${NC}\n" "Target IP" "Result" "Latency" "Source IP" "Interface" "Last Update"
-echo -e "${BOLD}------------------------------------------------------------------------------------------------${NC}"
+printf " ${BOLD}%-16s |  %-15s |  %-8s |  %-16s |  %-10s |  %s${NC}\n" "Target IP" "Result" "Latency" "Source IP" "Interface" "Last Update"
+echo -e "${BOLD}--------------------------------------------------------------------------------------------------${NC}"
 
 # Allocate line per IP, print placeholders
 for i in "${!IP_LIST[@]}"; do
-    printf " %-16s |  -               |  -       |  -                |  -          | -\n" "${IP_LIST[$i]}"
+    printf " %-16s |  -               |  -        |  -                |  -          | -\n" "${IP_LIST[$i]}"
 done
 
 # Print exit info below the table
@@ -110,10 +110,10 @@ while true; do
 
         if echo "$PING_OUTPUT" | grep -q "bytes"; then
             PING_TIME=$(echo "$PING_OUTPUT" | sed -nE 's/.* ([0-9.]+) ms.*/\1/p')
-            printf " ${GREEN}%-16s${NC} |  ✅ ${GREEN}OK${NC}           | %5sms  |  %-15s  |  %-9s  |  %s\n" \
+            printf " ${GREEN}%-16s${NC} |  ✅ ${GREEN}OK${NC}           | %5sms   |  %-15s  |  %-9s  |  %s\n" \
                 "$ip" "$PING_TIME" "$src_ip" "$iface" "$CURRENT_TIME"
         else
-            printf " ${RED}%-16s${NC} |  ❌ ${RED}No Response${NC}  |  -       |  %-15s  |  %-9s  |  %s\n" \
+            printf " ${RED}%-16s${NC} |  ❌ ${RED}No Response${NC}  |  -        |  %-15s  |  %-9s  |  %s\n" \
                 "$ip" "$src_ip" "$iface" "$CURRENT_TIME"
         fi
     done
