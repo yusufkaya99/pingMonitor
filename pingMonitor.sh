@@ -69,6 +69,7 @@ MAGENTA='\e[1;35m'
 BOLD='\e[1m'
 NC='\e[0m'
 
+tput reset
 tput civis  # Hide cursor
 
 cleanup() {
@@ -80,20 +81,20 @@ cleanup() {
 trap cleanup SIGINT
 
 # Print static header (that doesn't change)
-tput cup 1 0
+tput cup 0 0
 echo -e " ${CYAN}PING MONITOR by Andasis Inc.${NC}"
-tput cup 2 0
-echo -e " ${MAGENTA}Source IP address: resolving...${NC}"
+tput cup 1 0
+echo -e " ${MAGENTA}Source IP: resolving...${NC}"
 
 # Header row
-tput cup 4 0
+tput cup 3 0
 printf " ${BOLD}%-16s |  %-15s |  %-8s |  %s${NC}\n" "IP Address" "Result" "Latency" "Last Update"
-tput cup 5 0
+tput cup 4 0
 echo -e "${BOLD}----------------------------------------------------------------${NC}"
 
 # Allocate line per IP, print placeholders
 for i in "${!IP_LIST[@]}"; do
-    tput cup $((6 + i)) 0
+    tput cup $((5 + i)) 0
     printf " %-16s |  -               |  -        |  -\n" "${IP_LIST[$i]}"
 done
 
@@ -103,13 +104,13 @@ echo -e "\n${BOLD}CTRL+C to exit.${NC}"
 
 while true; do
     SOURCE_IP=$(ip route get 8.8.8.8 2>/dev/null | awk '/src/ {print $7}')
-    tput cup 2 0
-    echo -ne " ${MAGENTA}Source IP: ${SOURCE_IP}                         ${NC}"
+    tput cup 1 0
+    echo -ne " ${MAGENTA}Source IP : ${SOURCE_IP}                         ${NC}"
 
     for i in "${!IP_LIST[@]}"; do
         ip=${IP_LIST[$i]}
         PING_OUTPUT=$(fping -c1 -t"$PING_TIMEOUT" "$ip" 2>&1)
-        tput cup $((6 + i)) 0
+        tput cup $((5 + i)) 0
         CURRENT_TIME=$(date +"%H:%M:%S")
 
         if echo "$PING_OUTPUT" | grep -q "bytes"; then
