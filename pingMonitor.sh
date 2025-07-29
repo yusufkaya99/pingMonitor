@@ -79,39 +79,46 @@ cleanup() {
 
 trap cleanup SIGINT
 
-# Clear the terminal and hide the cursor at the beginning
-clear
+# Print static header (that doesn't change)
+tput cup 1 0
 echo -e " ${CYAN}PING MONITOR by Andasis Inc.${NC}"
-SOURCE_IP=$(ip route get 8.8.8.8 | awk '/src/ {print $7}')
-echo -e " ${MAGENTA}Source IP found as: $SOURCE_IP\n${NC}"
+tput cup 2 0
+echo -e " ${MAGENTA}Source IP address: resolving...${NC}"
 
-# Başlık satırını yazdır
+# Header row
+tput cup 4 0
 printf " ${BOLD}%-16s |  %-15s |  %-8s |  %s${NC}\n" "IP Address" "Result" "Latency" "Last Update"
+tput cup 5 0
 echo -e "${BOLD}----------------------------------------------------------------${NC}"
 
-# Allocate one line for each IP, print blank lines
-for ip in "${IP_LIST[@]}"; do
-    printf " %-16s |  -               |  -        |  -\n" "$ip"
+# Allocate line per IP, print placeholders
+for i in "${!IP_LIST[@]}"; do
+    tput cup $((6 + i)) 0
+    printf " %-16s |  -               |  -        |  -\n" "${IP_LIST[$i]}"
 done
 
+# Print exit info below the table
+tput cup $((6 + ${#IP_LIST[@]})) 0
 echo -e "\n${BOLD}CTRL+C to exit.${NC}"
-echo
 
 while true; do
-    # Ping each IP and write the result to the relevant line
-	for i in "${!IP_LIST[@]}"; do
-		ip=${IP_LIST[$i]}
-		PING_OUTPUT=$(fping -c1 -t"$PING_TIMEOUT" "$ip" 2>&1)
-		tput cup $((5 + i)) 0
-		CURRENT_TIME=$(date +"%H:%M:%S")
+    SOURCE_IP=$(ip route get 8.8.8.8 2>/dev/null | awk '/src/ {print $7}')
+    tput cup 2 0
+    echo -ne " ${MAGENTA}Source IP: ${SOURCE_IP}                         ${NC}"
 
-		if echo "$PING_OUTPUT" | grep -q "bytes"; then
-		    PING_TIME=$(echo "$PING_OUTPUT" | sed -nE 's/.* ([0-9.]+) ms.*/\1/p')
-		    printf " ${GREEN}%-16s${NC} |  ✅ ${GREEN}Response OK${NC}  | %5sms   |  %s\n" "$ip" "$PING_TIME" "$CURRENT_TIME"
-		else
-		    printf " ${RED}%-16s${NC} |  ❌ ${RED}No Response${NC}  |  -        |  %s\n" "$ip" "$CURRENT_TIME"
-		fi
-	done
+    for i in "${!IP_LIST[@]}"; do
+        ip=${IP_LIST[$i]}
+        PING_OUTPUT=$(fping -c1 -t"$PING_TIMEOUT" "$ip" 2>&1)
+        tput cup $((6 + i)) 0
+        CURRENT_TIME=$(date +"%H:%M:%S")
+
+        if echo "$PING_OUTPUT" | grep -q "bytes"; then
+            PING_TIME=$(echo "$PING_OUTPUT" | sed -nE 's/.* ([0-9.]+) ms.*/\1/p')
+            printf " ${GREEN}%-16s${NC} |  ✅ ${GREEN}Response OK${NC}  | %5sms   |  %s\n" "$ip" "$PING_TIME" "$CURRENT_TIME"
+        else
+            printf " ${RED}%-16s${NC} |  ❌ ${RED}No Response${NC}  |  -        |  %s\n" "$ip" "$CURRENT_TIME"
+        fi
+    done
 
     sleep "$INTERVAL"
 done
