@@ -58,9 +58,9 @@ Target IP       | Result         | Latency | Source IP       | Interface | Last 
 ```
 
 ## Options
--i, --interval N        Set interval between ping rounds (default: 2 seconds)"
--t, --timeout  N        Set timeout for each ping (default: 200 ms)"
--h, --help              Show the help message"
+- -i, --interval N        Set interval between ping rounds (default: 2 seconds)"
+- -t, --timeout  N        Set timeout for each ping (default: 200 ms)"
+- -h, --help              Show the help message"
 
 Example option usage:
 
