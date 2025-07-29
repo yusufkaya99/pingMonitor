@@ -81,43 +81,40 @@ cleanup() {
 trap cleanup SIGINT
 
 # Print static header (that doesn't change)
-tput cup 0 0
-echo -e " ${CYAN}PING MONITOR by Andasis Inc.${NC}"
-tput cup 1 0
-echo -e " ${MAGENTA}Source IP: resolving...${NC}"
+echo -e " ${CYAN}PING MONITOR by Andasis Inc.\n${NC}"
 
 # Header row
-tput cup 3 0
-printf " ${BOLD}%-16s |  %-15s |  %-8s |  %s${NC}\n" "IP Address" "Result" "Latency" "Last Update"
-tput cup 4 0
-echo -e "${BOLD}----------------------------------------------------------------${NC}"
+printf " ${BOLD}%-16s | %-16s | %-8s | %-17s | %-11s | %s${NC}\n" "Target IP" "Result" "Latency" "Source IP" "Interface" "Last Update"
+echo -e "${BOLD}------------------------------------------------------------------------------------------------${NC}"
 
 # Allocate line per IP, print placeholders
 for i in "${!IP_LIST[@]}"; do
-    tput cup $((5 + i)) 0
-    printf " %-16s |  -               |  -        |  -\n" "${IP_LIST[$i]}"
+    printf " %-16s |  -               |  -       |  -                |  -          | -\n" "${IP_LIST[$i]}"
 done
 
 # Print exit info below the table
-tput cup $((6 + ${#IP_LIST[@]})) 0
 echo -e "\n${BOLD}CTRL+C to exit.${NC}"
 
 while true; do
-    SOURCE_IP=$(ip route get 8.8.8.8 2>/dev/null | awk '/src/ {print $7}')
-    tput cup 1 0
-    echo -ne " ${MAGENTA}Source IP : ${SOURCE_IP}                         ${NC}"
-
     for i in "${!IP_LIST[@]}"; do
         ip=${IP_LIST[$i]}
+        route_info=$(ip route get "$ip" 2>/dev/null)
+
+        src_ip=$(echo "$route_info" | awk '{for (i=1;i<=NF;i++) if ($i=="src") print $(i+1)}')
+        iface=$(echo "$route_info" | awk '{for (i=1;i<=NF;i++) if ($i=="dev") print $(i+1)}')
+
         PING_OUTPUT=$(fping -c1 -t"$PING_TIMEOUT" "$ip" 2>&1)
-        tput cup $((5 + i)) 0
+        tput cup $((4 + i)) 0
+
         CURRENT_TIME=$(date +"%H:%M:%S")
 
         if echo "$PING_OUTPUT" | grep -q "bytes"; then
             PING_TIME=$(echo "$PING_OUTPUT" | sed -nE 's/.* ([0-9.]+) ms.*/\1/p')
-            printf " ${GREEN}%-16s${NC} |  ✅ ${GREEN}Response OK${NC}  | %5sms   |  %s\n" "$ip" "$PING_TIME" "$CURRENT_TIME"
+            printf " ${GREEN}%-16s${NC} |  ✅ ${GREEN}OK${NC}           | %5sms  |  %-15s  |  %-9s  |  %s\n" \
+                "$ip" "$PING_TIME" "$src_ip" "$iface" "$CURRENT_TIME"
         else
-            printf " ${RED}%-16s${NC} |  ❌ ${RED}No Response${NC}  |  -        |  %s\n" "$ip" "$CURRENT_TIME"
+            printf " ${RED}%-16s${NC} |  ❌ ${RED}No Response${NC}  |  -       |  %-15s  |  %-9s  |  %s\n" \
+                "$ip" "$src_ip" "$iface" "$CURRENT_TIME"
         fi
     done
 
