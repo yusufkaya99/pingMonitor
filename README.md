@@ -57,3 +57,14 @@ Target IP       | Result         | Latency | Source IP       | Interface | Last 
 8.8.8.8         | ❌ No Response |   -     | 192.168.1.12    | wlan0     | 14:20:15
 ```
 
+## Options
+-i, --interval N        Set interval between ping rounds (default: 2 seconds)"
+-t, --timeout  N        Set timeout for each ping (default: 200 ms)"
+-h, --help              Show the help message"
+
+Example option usage:
+
+
+```bash
+./pingMonitor.sh -i 5 -t 300
+```
