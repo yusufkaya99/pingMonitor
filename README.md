@@ -9,6 +9,7 @@ A minimal terminal-based tool to monitor multiple IP addresses using `fping`. It
 - Monitor multiple IP addresses in parallel
 - Determine source IP and interface for each destination
 - Show ping result and latency clearly in a table format
+- Show ping statistics like success, failure, rate and last status change time
 - Refreshes automatically at set intervals
 
 ---
@@ -51,10 +52,10 @@ Then run:
 Example output:
 
 ```bash
-Target IP       | Result         | Latency | Source IP       | Interface | Last Update
-----------------------------------------------------------------------------------------
-192.168.99.1    | ✅ OK          | 1.10ms  | 192.168.99.35   | enp45s0   | 14:20:15
-8.8.8.8         | ❌ No Response |   -     | 192.168.1.12    | wlan0     | 14:20:15
+ Target IP        |  Result          |  Latency  |  Source IP        |  Interface  |  Success  |  Failure  |  Rate  |  Last Change  |  Last Update
+---------------------------------------------------------------------------------------------------------------------------------------------------
+192.168.99.1      |  ✅ Successfull  |  1.10ms   |  192.168.99.35    |  enp45s0    |  10       |  10       |  %50   |  14:19:50     |  14:20:15
+8.8.8.8           |  ❌ No Response  |  -        |  192.168.1.12     |  wlan0      |  2        |  8        |  %20   |  14:20:05     |  14:20:15
 ```
 
 ## Options
